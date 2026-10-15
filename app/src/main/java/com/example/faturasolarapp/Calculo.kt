@@ -1,4 +1,4 @@
-package com.example.faturasolarapp    // <-- mantenha o package do SEU projeto
+package com.example.faturasolarapp   // <-- mantenha igual ao package do seu projeto
 
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -66,13 +66,14 @@ private fun String.numero(nome: String): BigDecimal =
         ?: throw IllegalArgumentException("Preencha corretamente o campo: $nome")
 
 /** Converte os textos em números e valida. Lança IllegalArgumentException com a mensagem de erro. */
+/** Converte os textos em números e valida. Lança IllegalArgumentException com a mensagem de erro. */
 fun Campos.paraEntrada(): EntradaFatura {
     val e = EntradaFatura(
-        ativaAnterior = ativaAnt.numero("Leitura anterior (energia ativa)"),
-        ativaAtual = ativaAtual.numero("Leitura atual (energia ativa)"),
-        reversaAnterior = revAnt.numero("Leitura anterior (energia reversa)"),
-        reversaAtual = revAtual.numero("Leitura atual (energia reversa)"),
-        saldoAnterior = saldoAnt.numero("Reserva acumulada anterior"),
+        ativaAnterior = ativaAnt.numero("Ativa anterior"),
+        ativaAtual = ativaAtual.numero("Ativa atual"),
+        reversaAnterior = revAnt.numero("Reversa anterior"),
+        reversaAtual = revAtual.numero("Reversa atual"),
+        saldoAnterior = saldoAnt.numero("Reserva anterior"),
         tarifaBase = tarifaBase.numero("Tarifa base"),
         bandeira = bandeira.numero("Bandeira"),
         cosip = cosip.numero("COSIP"),
@@ -83,6 +84,10 @@ fun Campos.paraEntrada(): EntradaFatura {
     }
     require(e.reversaAtual >= e.reversaAnterior) {
         "A leitura atual (reversa) não pode ser menor que a anterior."
+    }
+    require(e.bandeira >= BigDecimal.ZERO && e.bandeira <= BigDecimal("0.2")) {
+        "A bandeira deve ser em R$/kWh (ex.: 0,01885), da tabela 'Bandeira Tarifária' da fatura. " +
+                "O valor em R$ do 'Adicional Bandeira' (ex.: 0,93) não deve ser usado aqui."
     }
     return e
 }
