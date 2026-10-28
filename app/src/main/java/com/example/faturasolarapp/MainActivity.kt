@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -63,6 +64,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -101,7 +103,8 @@ private val CamposSaver = listSaver<Campos, Any>(
     save = {
         listOf(
             it.ativaAnt, it.ativaAtual, it.revAnt, it.revAtual,
-            it.saldoAnt, it.tarifaBase, it.bandeira, it.cosip, it.ligacao.name
+            it.saldoAnt, it.tarifaBase, it.tarifaFixa, it.bandeira, it.cosip, it.bonusItaipu,
+            it.ligacao.name
         )
     },
     restore = {
@@ -112,9 +115,11 @@ private val CamposSaver = listSaver<Campos, Any>(
             revAtual = it[3] as String,
             saldoAnt = it[4] as String,
             tarifaBase = it[5] as String,
-            bandeira = it[6] as String,
-            cosip = it[7] as String,
-            ligacao = Ligacao.valueOf(it[8] as String)
+            tarifaFixa = it[6] as String,
+            bandeira = it[7] as String,
+            cosip = it[8] as String,
+            bonusItaipu = it[9] as String,
+            ligacao = Ligacao.valueOf(it[10] as String)
         )
     }
 )
@@ -307,6 +312,7 @@ private fun BotaoAmarelo(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tamanhoFonte: TextUnit = 15.sp,
+    altura: Dp = 44.dp,
     onClick: () -> Unit
 ) {
     Button(
@@ -320,7 +326,7 @@ private fun BotaoAmarelo(
         ),
         shape = RoundedCornerShape(12.dp),
         contentPadding = PaddingValues(horizontal = 6.dp),
-        modifier = modifier.height(44.dp)
+        modifier = modifier.height(altura)
     ) {
         Text(texto, fontSize = tamanhoFonte, fontWeight = FontWeight.Bold, maxLines = 1)
     }
@@ -391,111 +397,203 @@ fun TelaDados(
         erro = null
     }
 
-    Pagina { larg ->
-        val largo = larg >= 600.dp
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val alturaTela = maxHeight
+        val largo = maxWidth >= 600.dp          // tablet
+        val muitoLargo = maxWidth >= 900.dp     // tablet grande / paisagem
 
-        Text(
-            "Fatura Solar App",
-            color = Color.White,
-            fontSize = if (largo) 28.sp else 22.sp,
-            fontWeight = FontWeight.Bold
-        )
+        // São 10 campos: 5 colunas em tablet grande (2 linhas) e 2 colunas no celular
+        // e no tablet em pé (5 linhas, COSIP e Bônus Itaipu lado a lado na última).
+        val colunas = if (muitoLargo) 5 else 2
 
-        // 2 colunas no celular, 4 em tablet
-        Grade(colunas = if (largo) 4 else 2, quantidade = 8) { i ->
-            when (i) {
-                0 -> CampoCompacto("Ativa anterior (kWh)", campos.ativaAnt) {
-                    onChange(campos.copy(ativaAnt = it))
-                }
-                1 -> CampoCompacto("Ativa atual (kWh)", campos.ativaAtual) {
-                    onChange(campos.copy(ativaAtual = it))
-                }
-                2 -> CampoCompacto("Reversa anterior (kWh)", campos.revAnt) {
-                    onChange(campos.copy(revAnt = it))
-                }
-                3 -> CampoCompacto("Reversa atual (kWh)", campos.revAtual) {
-                    onChange(campos.copy(revAtual = it))
-                }
-                4 -> CampoCompacto("Reserva anterior (kWh)", campos.saldoAnt) {
-                    onChange(campos.copy(saldoAnt = it))
-                }
-                5 -> CampoCompacto("Tarifa base (R$/kWh)", campos.tarifaBase, "0,875710") {
-                    onChange(campos.copy(tarifaBase = it))
-                }
-                6 -> CampoCompacto("Bandeira (R$/kWh)", campos.bandeira, "0,01885") {
-                    onChange(campos.copy(bandeira = it))
-                }
-                else -> CampoCompacto("COSIP (R$)", campos.cosip, "53,33") {
-                    onChange(campos.copy(cosip = it))
-                }
-            }
+        // Medidas que crescem no tablet e se adaptam à altura da tela
+        val margem = if (largo) 32.dp else 14.dp
+        val espacoH = if (muitoLargo) 16.dp else if (largo) 20.dp else 10.dp
+        val folgaCampo: Dp =
+            if (largo) (alturaTela * 0.025f).coerceIn(14.dp, 30.dp) else 8.dp
+        val folgaLateralCampo: Dp = if (largo && !muitoLargo) 14.dp else 12.dp
+        val tamRotulo = when {
+            maxWidth >= 1100.dp -> 13.sp
+            maxWidth >= 900.dp -> 10.sp
+            maxWidth >= 600.dp -> 15.sp
+            else -> 11.sp
         }
+        val tamValor = when {
+            maxWidth >= 900.dp -> 24.sp
+            maxWidth >= 600.dp -> 26.sp
+            else -> 18.sp
+        }
+        val alturaBotao = if (largo) 64.dp else 50.dp
+        val fonteBotao = if (largo) 20.sp else 16.sp
 
-        // Tipo de ligação (botões compactos)
+        // Rolagem + altura mínima = tela inteira.
+        // SpaceEvenly distribui o espaço livre entre as linhas, preenchendo a tela toda.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = alturaTela)
+                .padding(horizontal = margem, vertical = if (largo) 16.dp else 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text("Tipo de ligação (custo de disponibilidade)", fontSize = 11.sp, color = TextoRotulo)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Ligacao.values().forEach { opcao ->
-                    val selecionado = campos.ligacao == opcao
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (selecionado) Amarelo else Color(0xFFEAF1F7))
-                            .clickable { onChange(campos.copy(ligacao = opcao)) }
-                            .padding(vertical = 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "${opcao.rotulo}\n${opcao.disponibilidade} kWh",
-                            fontSize = 12.sp,
-                            fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Normal,
-                            color = TextoEscuro,
-                            textAlign = TextAlign.Center
-                        )
+            Text(
+                "Fatura Solar App",
+                color = Color.White,
+                fontSize = if (largo) 36.sp else 26.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Campos em colunas: cada linha é um Row com campos de mesmo peso.
+            // Se a última linha tiver menos campos, eles se esticam e ocupam a largura toda.
+            (0 until 10).chunked(colunas).forEach { linha ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(espacoH)
+                ) {
+                    linha.forEach { i ->
+                        Box(Modifier.weight(1f)) {
+                            val rotulo: String
+                            val valor: String
+                            val dica: String
+                            val aoMudar: (String) -> Unit
+                            when (i) {
+                                0 -> {
+                                    rotulo = "Ativa anterior (kWh)"; valor = campos.ativaAnt; dica = ""
+                                    aoMudar = { onChange(campos.copy(ativaAnt = it)) }
+                                }
+                                1 -> {
+                                    rotulo = "Ativa atual (kWh)"; valor = campos.ativaAtual; dica = ""
+                                    aoMudar = { onChange(campos.copy(ativaAtual = it)) }
+                                }
+                                2 -> {
+                                    rotulo = "Reversa anterior (kWh)"; valor = campos.revAnt; dica = ""
+                                    aoMudar = { onChange(campos.copy(revAnt = it)) }
+                                }
+                                3 -> {
+                                    rotulo = "Reversa atual (kWh)"; valor = campos.revAtual; dica = ""
+                                    aoMudar = { onChange(campos.copy(revAtual = it)) }
+                                }
+                                4 -> {
+                                    rotulo = "Acumulada anterior (kWh)"; valor = campos.saldoAnt; dica = ""
+                                    aoMudar = { onChange(campos.copy(saldoAnt = it)) }
+                                }
+                                5 -> {
+                                    rotulo = "Tarifa base (R$/kWh)"; valor = campos.tarifaBase; dica = "0,875710"
+                                    aoMudar = { onChange(campos.copy(tarifaBase = it)) }
+                                }
+                                6 -> {
+                                    rotulo = "Tarifa fixa (R$/kWh)"; valor = campos.tarifaFixa; dica = "0,894560"
+                                    aoMudar = { onChange(campos.copy(tarifaFixa = it)) }
+                                }
+                                7 -> {
+                                    rotulo = "Bandeira (R$/kWh)"; valor = campos.bandeira; dica = "0,01885"
+                                    aoMudar = { onChange(campos.copy(bandeira = it)) }
+                                }
+                                8 -> {
+                                    rotulo = "COSIP (R$)"; valor = campos.cosip; dica = "53,33"
+                                    aoMudar = { onChange(campos.copy(cosip = it)) }
+                                }
+                                else -> {
+                                    rotulo = "Bônus Itaipu (R$)"; valor = campos.bonusItaipu; dica = "0,00"
+                                    aoMudar = { onChange(campos.copy(bonusItaipu = it)) }
+                                }
+                            }
+                            CampoCompacto(
+                                rotulo = rotulo,
+                                valor = valor,
+                                dica = dica,
+                                tamRotulo = tamRotulo,
+                                tamValor = tamValor,
+                                folgaVertical = folgaCampo,
+                                folgaHorizontal = folgaLateralCampo,
+                                onChange = aoMudar
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        // Botões na mesma linha
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BotaoAmarelo("Calcular", Modifier.weight(1f), onClick = acaoCalcular)
-            BotaoAmarelo("Limpar", Modifier.weight(1f), onClick = acaoLimpar)
-            BotaoAmarelo("Histórico", Modifier.weight(1f), onClick = onHistorico)
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF5))
-        ) {
-            Text(
-                text = erro ?: "O resultado aparecerá na próxima tela",
-                color = if (erro != null) Vermelho else TextoEscuro,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center,
+            // Tipo de ligação
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(10.dp)
-            )
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp, vertical = if (largo) 16.dp else 8.dp),
+                verticalArrangement = Arrangement.spacedBy(if (largo) 10.dp else 6.dp)
+            ) {
+                Text(
+                    "Tipo de ligação (custo de disponibilidade)",
+                    fontSize = if (muitoLargo) 16.sp else 12.sp,
+                    color = TextoRotulo
+                )
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(if (largo) 14.dp else 6.dp)
+                ) {
+                    Ligacao.values().forEach { opcao ->
+                        val selecionado = campos.ligacao == opcao
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (selecionado) Amarelo else Color(0xFFEAF1F7))
+                                .clickable { onChange(campos.copy(ligacao = opcao)) }
+                                .padding(vertical = if (largo) 16.dp else 9.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "${opcao.rotulo}\n${opcao.disponibilidade} kWh",
+                                fontSize = if (largo) 20.sp else 14.sp,
+                                fontWeight = if (selecionado) FontWeight.Bold else FontWeight.Normal,
+                                color = TextoEscuro,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Botões na mesma linha
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(espacoH)
+            ) {
+                BotaoAmarelo("Calcular", Modifier.weight(1f), tamanhoFonte = fonteBotao, altura = alturaBotao, onClick = acaoCalcular)
+                BotaoAmarelo("Limpar", Modifier.weight(1f), tamanhoFonte = fonteBotao, altura = alturaBotao, onClick = acaoLimpar)
+                BotaoAmarelo("Histórico", Modifier.weight(1f), tamanhoFonte = fonteBotao, altura = alturaBotao, onClick = onHistorico)
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF5))
+            ) {
+                Text(
+                    text = erro ?: "O resultado aparecerá na próxima tela",
+                    color = if (erro != null) Vermelho else TextoEscuro,
+                    fontSize = if (largo) 18.sp else 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(if (largo) 18.dp else 10.dp)
+                )
+            }
         }
     }
 }
 
-/** Campo de texto compacto: rótulo pequeno em cima e valor embaixo. */
+/** Campo de texto: rótulo em cima e valor embaixo. Tamanhos ajustáveis para tablet/celular. */
 @Composable
 private fun CampoCompacto(
     rotulo: String,
     valor: String,
     dica: String = "",
+    tamRotulo: TextUnit = 11.sp,
+    tamValor: TextUnit = 15.sp,
+    folgaVertical: Dp = 5.dp,
+    folgaHorizontal: Dp = 14.dp,
     onChange: (String) -> Unit
 ) {
     Column(
@@ -503,21 +601,28 @@ private fun CampoCompacto(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
-            .padding(horizontal = 12.dp, vertical = 5.dp)
+            .padding(horizontal = folgaHorizontal, vertical = folgaVertical),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Text(rotulo, fontSize = 11.sp, color = TextoRotulo, maxLines = 1)
+        Text(
+            rotulo,
+            fontSize = tamRotulo,
+            color = TextoRotulo,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         BasicTextField(
             value = valor,
             onValueChange = onChange,
             singleLine = true,
-            textStyle = TextStyle(fontSize = 15.sp, color = TextoEscuro),
+            textStyle = TextStyle(fontSize = tamValor, color = TextoEscuro),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             cursorBrush = SolidColor(TextoEscuro),
             modifier = Modifier.fillMaxWidth(),
             decorationBox = { campoInterno ->
                 Box {
                     if (valor.isEmpty() && dica.isNotEmpty()) {
-                        Text(dica, fontSize = 15.sp, color = Color(0xFFB0BAC4))
+                        Text(dica, fontSize = tamValor, color = Color(0xFFB0BAC4))
                     }
                     campoInterno()
                 }
@@ -577,11 +682,14 @@ fun TelaResultado(
                     "R$ ${r.itemConsumoCompensado.reais()}"
                 )
                 Linha(
-                    "Consumo ${r.kwhCobrado.kwh()} kWh a ${r.tarifaComBandeira.tarifa()}",
+                    "Consumo ${r.kwhCobrado.kwh()} kWh a ${r.tarifaFixa.tarifa()}",
                     "R$ ${r.itemConsumoCobrado.reais()}"
                 )
                 Linha("COSIP", "R$ ${r.cosip.reais()}")
                 Linha("Crédito de Geração F/Ponta", "R$ ${r.creditoGeracao.reais()}")
+                if (r.bonusItaipu.signum() != 0) {
+                    Linha("Bônus Itaipu (desconto)", "- R$ ${r.bonusItaipu.reais()}")
+                }
                 HorizontalDivider(Modifier.padding(vertical = 2.dp))
                 Linha(
                     "Adicional Bandeira (informativo, já incluso)",

@@ -181,10 +181,17 @@ object RelatorioPdf {
         y = secao(c, y, "Dados informados")
         y = linha(c, y, "Energia ativa (consumo da rede)", "de ${campos.ativaAnt} a ${campos.ativaAtual} kWh")
         y = linha(c, y, "Energia reversa (injetada)", "de ${campos.revAnt} a ${campos.revAtual} kWh")
-        y = linha(c, y, "Reserva acumulada anterior", "${campos.saldoAnt} kWh")
+        y = linha(c, y, "Acumulada anterior", "${campos.saldoAnt} kWh")
         y = linha(c, y, "Tarifa base", "R$ ${campos.tarifaBase}/kWh")
+        y = linha(
+            c, y, "Tarifa fixa (consumo fixo)",
+            if (campos.tarifaFixa.isBlank()) "base + bandeira" else "R$ ${campos.tarifaFixa}/kWh"
+        )
         y = linha(c, y, "Bandeira", "R$ ${campos.bandeira}/kWh")
         y = linha(c, y, "COSIP", "R$ ${campos.cosip}")
+        if (campos.bonusItaipu.isNotBlank()) {
+            y = linha(c, y, "Bônus Itaipu", "R$ ${campos.bonusItaipu}")
+        }
         y = linha(
             c, y, "Tipo de ligação",
             "${campos.ligacao.rotulo} (${campos.ligacao.disponibilidade} kWh)"
@@ -209,11 +216,14 @@ object RelatorioPdf {
         )
         y = linha(
             c, y,
-            "Consumo ${r.kwhCobrado.kwh()} kWh a ${r.tarifaComBandeira.tarifa()}",
+            "Consumo ${r.kwhCobrado.kwh()} kWh a ${r.tarifaFixa.tarifa()}",
             "R$ ${r.itemConsumoCobrado.reais()}"
         )
         y = linha(c, y, "COSIP", "R$ ${r.cosip.reais()}")
         y = linha(c, y, "Crédito de Geração F/Ponta", "R$ ${r.creditoGeracao.reais()}")
+        if (r.bonusItaipu.signum() != 0) {
+            y = linha(c, y, "Bônus Itaipu (desconto)", "- R$ ${r.bonusItaipu.reais()}")
+        }
 
         // Caixa do total
         y += 8f

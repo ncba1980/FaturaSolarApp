@@ -67,8 +67,10 @@ private fun Registro.paraJson(): JSONObject = JSONObject().apply {
     put("revAtual", campos.revAtual)
     put("saldoAnt", campos.saldoAnt)
     put("tarifaBase", campos.tarifaBase)
+    put("tarifaFixa", campos.tarifaFixa)
     put("bandeira", campos.bandeira)
     put("cosip", campos.cosip)
+    put("bonusItaipu", campos.bonusItaipu)
     put("ligacao", campos.ligacao.name)
 }
 
@@ -82,8 +84,12 @@ private fun JSONObject.paraRegistro(): Registro = Registro(
         revAtual = getString("revAtual"),
         saldoAnt = getString("saldoAnt"),
         tarifaBase = getString("tarifaBase"),
+        // registros antigos não têm este campo: vazio = usa tarifa base + bandeira
+        tarifaFixa = optString("tarifaFixa", ""),
         bandeira = getString("bandeira"),
         cosip = getString("cosip"),
+        // registros antigos não têm este campo: vazio = sem bônus
+        bonusItaipu = optString("bonusItaipu", ""),
         ligacao = Ligacao.valueOf(getString("ligacao"))
     )
 )
