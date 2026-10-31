@@ -1,5 +1,5 @@
 # FaturaSolarApp
-App para fazer os cáculos de consumo, geração e estoque de energia solar. Como também exibir os valores a serem pagos.
+App para fazer os cálculos de consumo, geração e estoque de energia solar. Como também exibir os valores a serem pagos.
 
 # ☀️ App de Auditoria de Energia Solar Fotovoltaica (Grupo B/ANEEL)
 
