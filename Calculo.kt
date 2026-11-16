@@ -1,3 +1,4 @@
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
 package com.example.faturasolar   // <-- mantenha o package do SEU projeto
 
 import java.math.BigDecimal
