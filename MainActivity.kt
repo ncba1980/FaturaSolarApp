@@ -139,7 +139,7 @@ fun FaturaSolarApp() {
         }
     }
 }
-
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
 // ------------------------------------------------------------------ Logo (desenhado em código)
 @Composable
 fun Logo(tamanho: Dp) {
@@ -234,7 +234,7 @@ fun TelaInicial(onContinuar: () -> Unit) {
         )
     }
 }
-
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
 // ------------------------------------------------------------------ Tela 2: dados
 @Composable
 fun TelaDados(
@@ -320,7 +320,7 @@ fun TelaDados(
                 }
             }
         }
-
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
         Button(
             onClick = {
                 runCatching { campos.paraEntrada() }
@@ -386,7 +386,7 @@ private fun Campo(rotulo: String, valor: String, onChange: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth()
     )
 }
-
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
 // ------------------------------------------------------------------ Tela 3: resultado
 private fun BigDecimal.kwh(): String =
     stripTrailingZeros().toPlainString().replace('.', ',')
@@ -492,7 +492,7 @@ private fun Secao(titulo: String, conteudo: @Composable () -> Unit) {
         }
     }
 }
-
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
 @Composable
 private fun Linha(rotulo: String, valor: String) {
     Row(
@@ -505,3 +505,4 @@ private fun Linha(rotulo: String, valor: String) {
         Text(valor, fontWeight = FontWeight.Medium, fontSize = 14.sp, color = TextoEscuro)
     }
 }
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
