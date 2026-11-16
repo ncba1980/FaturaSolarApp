@@ -65,6 +65,7 @@ data class ResultadoFatura(
 private fun String.numero(nome: String): BigDecimal =
     trim().replace(',', '.').toBigDecimalOrNull()
         ?: throw IllegalArgumentException("Preencha corretamente o campo: $nome")
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
 
 /** Converte os textos em números e valida. Lança IllegalArgumentException com a mensagem de erro. */
 fun Campos.paraEntrada(): EntradaFatura {
@@ -144,3 +145,4 @@ fun calcularFatura(e: EntradaFatura): ResultadoFatura {
         total = total
     )
 }
+/** Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.*/
