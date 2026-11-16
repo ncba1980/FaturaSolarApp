@@ -1,3 +1,10 @@
+## Licença e Direitos Autorais
+
+Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados. Contato: nadson.cley@hotmail.com
+
+Este código-fonte é proprietário e confidencial. Nenhuma parte deste repositório pode ser copiada, modificada, distribuída, sublicenciada ou utilizada para fins comerciais ou pessoais sem a permissão prévia e por escrito do detentor dos direitos autorais.
+
+
 # FaturaSolarApp
 App para fazer os cálculos de consumo, geração e estoque de energia solar. Como também exibir os valores a serem pagos.
 
@@ -28,5 +35,10 @@ O projeto nasceu de uma necessidade real de mercado: traduzir a complexidade das
 *   **UX/UI:** Interfaces responsivas para celulares e tablets validadas por inspeção heurística
 
 ---
-*Este projeto foi desenvolvido como parte de um estudo de caso e Engenharia de Software aplicada ao setor elétrico brasileiro.*
+## Licença e Direitos Autorais
+
+Copyright (c) 2026 [Nadson Cley Bezerra de Araújo]. Todos os direitos reservados.Contato: nadson.cley@hotmail.com
+
+Este código-fonte é proprietário e confidencial. Nenhuma parte deste repositório pode ser copiada, modificada, distribuída, sublicenciada ou utilizada para fins comerciais ou pessoais sem a permissão prévia e por escrito do detentor dos direitos autorais.
+
 
